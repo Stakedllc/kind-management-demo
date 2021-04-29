@@ -1,0 +1,28 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: permissionless
+spec:
+  template:
+    metadata:
+      labels:
+        kind: permissionless
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: test
+        image: kubectl:local
+        command:
+        - sh
+        - /tmp/check-kube-permissions.sh
+
+        volumeMounts:
+        - name: scripts
+          mountPath: /tmp/check-kube-permissions.sh
+          subPath: check-kube-permissions.sh
+
+      volumes:
+      - name: scripts
+        configMap:
+          name: scripts

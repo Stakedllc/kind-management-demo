@@ -1,0 +1,28 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: scripts
+data:
+  check-kube-permissions.sh: |
+    get_pods_status=$(kubectl get pods > /dev/null 2>&1 && echo 0 || echo 1)
+    get_service_status=$(kubectl get service > /dev/null 2>&1 && echo 0 || echo 1)
+    get_namespace_status=$(kubectl get ns > /dev/null 2>&1 && echo 0 || echo 1)
+
+    if [ "$get_pods_status" -eq "0" ]; then
+      printf "Get pods test:\t\t\tPassed\n"
+    else
+      printf "Get pods test:\t\t\tFailed\n"
+    fi
+
+    if [ "$get_service_status" -eq "0" ]; then
+      printf "Get service test:\t\tPassed\n"
+    else
+      printf "Get service test:\t\tFailed\n"
+    fi
+
+    if [ "$get_namespace_status" -eq "0" ]; then
+      printf "Get namespace test:\t\tPassed\n"
+    else
+      printf "Get namespace test:\t\tFailed\n"
+    fi

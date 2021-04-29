@@ -1,0 +1,56 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: permissioned
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: permissioned
+rules:
+- apiGroups: ['*']
+  resources: ['pods']
+  verbs:     ['list']
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: permissioned-binding
+subjects:
+- kind: ServiceAccount
+  name: permissioned
+  namespace: default
+roleRef:
+  kind: ClusterRole
+  name: permissioned
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: permissioned
+spec:
+  template:
+    metadata:
+      labels:
+        kind: permissioned
+    spec:
+      serviceAccountName: permissioned
+      restartPolicy: OnFailure
+      containers:
+      - name: test
+        image: kubectl:local
+        command:
+        - sh
+        - /tmp/check-kube-permissions.sh
+
+        volumeMounts:
+        - name: scripts
+          mountPath: /tmp/check-kube-permissions.sh
+          subPath: check-kube-permissions.sh
+
+      volumes:
+      - name: scripts
+        configMap:
+          name: scripts
